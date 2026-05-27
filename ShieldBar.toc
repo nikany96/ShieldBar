@@ -1,0 +1,8 @@
+## Interface: 11200
+## Title: ShieldBar
+## Notes: Displays absorb shield HP as a segmented bar (PW:Shield, Ice Barrier, Sacrifice, potions, etc.)
+## Author: ShieldBar
+## Version: 1.3
+## SavedVariables: ShieldBarDB
+
+ShieldBar.lua
