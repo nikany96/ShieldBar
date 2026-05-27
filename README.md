@@ -1,0 +1,25 @@
+# ShieldBar
+
+Absorb shield tracker for OctoWoW / Turtle WoW 1.12.1.
+
+Displays remaining absorb HP as a segmented bar on screen. Supports Power Word: Shield, Sacrifice, Ice Barrier, Frost/Fire Ward, and protection potions.
+
+## Commands
+
+`/shieldbar` or `/sb`
+
+| Command | Description |
+|---|---|
+| `show` | Always show bar (default) |
+| `hide` | Only show bar when in combat with an active shield |
+| `vertical` | Vertical bar layout (default) |
+| `horizontal` | Horizontal bar layout |
+| `lock` | Lock bar position |
+| `unlock` | Unlock bar position — drag with left mouse button |
+| `reset` | Reset all settings to default |
+
+## Installation
+
+1. Download and extract the `ShieldBar` folder.
+2. Place it in `World of Warcraft/Interface/AddOns/`.
+3. Reload the UI or log in — the bar appears on the right side of the screen.

@@ -11,7 +11,6 @@
 --   lock       – lock bar position
 --   unlock     – unlock bar position (drag with left mouse button)
 --   reset      – reset ALL settings to default
---   test       – show a test display
 
 -- ============================================================
 -- Config
@@ -444,13 +443,6 @@ local function HandleCommand(msg)
         UpdateVisibility()
         DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r All settings reset to default.")
 
-    elseif msg == "test" then
-        state.current = 750 ; state.max = 1125 ; state.active = true
-        UpdateBar()
-        -- Force show even in hide mode so the test is visible
-        if barReady then barFrame:Show() end
-        DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Test display (750/1125).")
-
     else
         local modeStr = hiddenMode
             and "|cffFF8800hide|r (will only show when in combat with an active shield)"
@@ -463,7 +455,6 @@ local function HandleCommand(msg)
         DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb lock|r        – lock position")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb unlock|r      – unlock position")
         DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb reset|r       – reset ALL settings to default")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb test|r        – test display")
     end
 end
 
