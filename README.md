@@ -1,6 +1,6 @@
 # ShieldBar
 
-Absorb shield tracker for OctoWoW / Turtle WoW 1.12.1.
+Absorb shield tracker for OctoWoW.
 
 Displays remaining absorb HP as a segmented bar on screen. Supports Power Word: Shield, Sacrifice, Ice Barrier, Frost/Fire Ward, and protection potions.
 
