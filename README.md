@@ -26,6 +26,9 @@ Displays remaining absorb HP as a segmented bar on screen.
 | `horizontal` | Horizontal bar layout |
 | `lock` | Lock bar position |
 | `unlock` | Unlock bar position — drag with left mouse button |
+| `curve` | Curved/bent bar shape |
+| `straight` | Straight bar shape (default) |
+| `size <1-5>` | Bar size — 1 smallest, 5 largest (default: 3) |
 | `reset` | Reset all settings to default |
 
 ## Installation

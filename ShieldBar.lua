@@ -8,6 +8,9 @@
 --   hide       – only show bar when in combat AND a shield is active
 --   vertical   – vertical bar layout
 --   horizontal – horizontal bar layout
+--   curve      – curved/bent bar shape
+--   straight   – straight bar shape (default)
+--   size <1-5> – bar size (3 = default)
 --   lock       – lock bar position
 --   unlock     – unlock bar position (drag with left mouse button)
 --   reset      – reset ALL settings to default
@@ -17,9 +20,6 @@
 -- ============================================================
 local CFG = {
     segments       = 20,
-    segW           = 34,
-    segH           = 9,
-    segGap         = 3,
     defaultAnchorX = -60,
     defaultAnchorY = 0,
     colBot         = {1.0, 0.35, 0.0},
@@ -27,6 +27,15 @@ local CFG = {
     colEmpty       = {0.15, 0.09, 0.02},
     colAlpha       = 1.0,
     colEmptyAlpha  = 0.70,
+}
+
+-- segW = long side of each segment, segH = short side, segGap = gap between segments
+local SIZE_PRESETS = {
+    {segW=20, segH=5,  segGap=2},
+    {segW=27, segH=7,  segGap=2},
+    {segW=34, segH=9,  segGap=3},
+    {segW=44, segH=11, segGap=3},
+    {segW=54, segH=14, segGap=4},
 }
 
 -- ============================================================
@@ -69,14 +78,18 @@ local orientation = "vertical"
 local hiddenMode  = false
 local locked      = false
 local inCombat    = false
+local curved      = false
+local curveFlip   = false
+local barSize     = 3
 
--- Load all persistent settings from ShieldBarDB.
--- Called from VARIABLES_LOADED, before the bar is created.
 local function LoadSettings()
     if not ShieldBarDB then return end
-    if ShieldBarDB.orientation then orientation = ShieldBarDB.orientation end
-    if ShieldBarDB.hidden      ~= nil then hiddenMode = ShieldBarDB.hidden end
-    if ShieldBarDB.locked      ~= nil then locked     = ShieldBarDB.locked end
+    if ShieldBarDB.orientation ~= nil then orientation = ShieldBarDB.orientation end
+    if ShieldBarDB.hidden      ~= nil then hiddenMode  = ShieldBarDB.hidden      end
+    if ShieldBarDB.locked      ~= nil then locked      = ShieldBarDB.locked      end
+    if ShieldBarDB.curved      ~= nil then curved      = ShieldBarDB.curved      end
+    if ShieldBarDB.curveFlip   ~= nil then curveFlip   = ShieldBarDB.curveFlip   end
+    if ShieldBarDB.barSize     ~= nil then barSize     = ShieldBarDB.barSize     end
 end
 
 local function SaveSetting(key, value)
@@ -91,7 +104,6 @@ local barFrame, numText
 local segs     = {}
 local barReady = false
 
--- Visibility: in hide mode the bar is only shown when in combat AND shield active.
 local function UpdateVisibility()
     if not barReady then return end
     if hiddenMode then
@@ -107,7 +119,6 @@ end
 
 local function SavePosition()
     if not barFrame then return end
-    -- Use GetPoint so we save the exact anchor type, not just pixel coords.
     local point, _, relPoint, x, y = barFrame:GetPoint(1)
     if not point then return end
     SaveSetting("posPoint",    point)
@@ -129,26 +140,40 @@ end
 local function LayoutBar()
     if not barReady then return end
     local cfg  = CFG
+    local sz   = SIZE_PRESETS[barSize]
+    local segW, segH, segGap = sz.segW, sz.segH, sz.segGap
     local vert = (orientation == "vertical")
-    local totalSpan = cfg.segments * (cfg.segH + cfg.segGap) - cfg.segGap
+
+    -- maxIndent: how many pixels narrower the middle segments become (crescent shape).
+    local maxIndent = curved and math.floor(segW * 0.55) or 0
 
     if vert then
-        barFrame:SetWidth(cfg.segW + 14)
+        local totalSpan = cfg.segments * (segH + segGap) - segGap
+        barFrame:SetWidth(segW + 14)
         barFrame:SetHeight(totalSpan + 26)
     else
+        local totalSpan = cfg.segments * (segH + segGap) - segGap
         barFrame:SetWidth(totalSpan + 14)
-        barFrame:SetHeight(cfg.segW + 26)
+        barFrame:SetHeight(segW + 14)
     end
 
     for i = 1, cfg.segments do
         local seg = segs[i]
         seg:ClearAllPoints()
 
+        local t      = (i - 1) / math.max(cfg.segments - 1, 1)
+        local indent = math.floor(math.sin(t * math.pi) * maxIndent)
+        local w      = math.max(4, segW - indent)
+
         if vert then
-            local yOff = (i-1) * (cfg.segH + cfg.segGap)
-            seg:SetWidth(cfg.segW)
-            seg:SetHeight(cfg.segH)
-            seg:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", 7, yOff + 18)
+            local yOff = (i-1) * (segH + segGap)
+            seg:SetWidth(w)
+            seg:SetHeight(segH)
+            if curveFlip then
+                seg:SetPoint("BOTTOMLEFT",  barFrame, "BOTTOMLEFT",  7,  yOff + 18)
+            else
+                seg:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", -7, yOff + 18)
+            end
 
             seg.topEdge:ClearAllPoints()
             seg.topEdge:SetPoint("TOPLEFT",  seg, "TOPLEFT",  0, 0)
@@ -160,10 +185,15 @@ local function LayoutBar()
             seg.shine:SetPoint("TOPRIGHT", seg, "TOPRIGHT", 0, -2)
             seg.shine:SetHeight(2)
         else
-            local xOff = (i-1) * (cfg.segH + cfg.segGap)
-            seg:SetWidth(cfg.segH)
-            seg:SetHeight(cfg.segW)
-            seg:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", xOff + 7, 18)
+            local xOff = (i-1) * (segH + segGap)
+            local h    = math.max(4, segW - indent)
+            seg:SetWidth(segH)
+            seg:SetHeight(h)
+            if curveFlip then
+                seg:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", xOff + 7, 18)
+            else
+                seg:SetPoint("TOPLEFT",    barFrame, "TOPLEFT",    xOff + 7, -18)
+            end
 
             seg.topEdge:ClearAllPoints()
             seg.topEdge:SetPoint("TOPRIGHT",    seg, "TOPRIGHT",    0, 0)
@@ -224,7 +254,6 @@ local function CreateBar()
     numText:SetTextColor(1.0, 0.85, 0.1, 1.0)
     numText:SetText("")
 
-    -- Settings were already loaded in VARIABLES_LOADED; just apply them.
     LayoutBar()
     ApplyPosition()
     UpdateVisibility()
@@ -432,29 +461,66 @@ local function HandleCommand(msg)
         LayoutBar()
         DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Layout set to |cffFFFF00horizontal|r.")
 
+    elseif msg == "curve" then
+        curved = true
+        SaveSetting("curved", true)
+        LayoutBar()
+        DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Bar shape set to |cffFFFF00curved|r.")
+
+    elseif msg == "straight" then
+        curved = false
+        SaveSetting("curved", false)
+        LayoutBar()
+        DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Bar shape set to |cffFFFF00straight|r.")
+
+    elseif msg == "curve rotate" then
+        curveFlip = not curveFlip
+        SaveSetting("curveFlip", curveFlip)
+        LayoutBar()
+        local dir = curveFlip and "flipped" or "normal"
+        DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Curve direction: |cffFFFF00" .. dir .. "|r.")
+
     elseif msg == "reset" then
-        -- Reset ALL settings to default
-        ShieldBarDB      = {}
-        orientation      = "vertical"
-        hiddenMode       = false
-        locked           = false
+        ShieldBarDB  = {}
+        orientation  = "vertical"
+        hiddenMode   = false
+        locked       = false
+        curved       = false
+        curveFlip    = false
+        barSize      = 3
         LayoutBar()
         ApplyPosition()
         UpdateVisibility()
         DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r All settings reset to default.")
 
     else
-        local modeStr = hiddenMode
-            and "|cffFF8800hide|r (will only show when in combat with an active shield)"
-            or  "|cff00FF00show|r (always visible)"
-        DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar|r v1.4  –  mode: " .. modeStr)
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb show|r        – always show bar")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb hide|r        – only show when in combat + shield active")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb vertical|r    – vertical layout")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb horizontal|r  – horizontal layout")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb lock|r        – lock position")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb unlock|r      – unlock position")
-        DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb reset|r       – reset ALL settings to default")
+        local _, _, sizeStr = string.find(msg, "^size (%d)$")
+        if sizeStr then
+            local s = tonumber(sizeStr)
+            if s and s >= 1 and s <= 5 then
+                barSize = s
+                SaveSetting("barSize", s)
+                LayoutBar()
+                DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Size set to |cffFFFF00" .. s .. "|r.")
+            else
+                DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar:|r Size must be between 1 and 5.")
+            end
+        else
+            local modeStr  = hiddenMode and "|cffFF8800hide|r" or "|cff00FF00show|r"
+            local shapeStr = curved     and "|cffFFFF00curved|r" or "|cffFFFF00straight|r"
+            DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar|r v1.5  –  mode: " .. modeStr .. "  shape: " .. shapeStr .. "  size: |cffFFFF00" .. barSize .. "|r")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb show|r        – always show bar")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb hide|r        – only show when in combat + shield active")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb vertical|r    – vertical layout")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb horizontal|r  – horizontal layout")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb curve|r          – curved bar shape")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb curve rotate|r  – flip curve direction")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb straight|r      – straight bar shape")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb size 1-5|r    – bar size (3 = default)")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb lock|r        – lock position")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb unlock|r      – unlock position")
+            DEFAULT_CHAT_FRAME:AddMessage("  |cffFFFF00/sb reset|r       – reset ALL settings to default")
+        end
     end
 end
 
@@ -466,10 +532,10 @@ SlashCmdList["SHIELDBAR"] = function(msg) HandleCommand(msg) end
 -- Events
 -- ============================================================
 local evFrame = CreateFrame("Frame", "ShieldBarEventFrame", UIParent)
-evFrame:RegisterEvent("VARIABLES_LOADED")       -- load settings before bar is created
+evFrame:RegisterEvent("VARIABLES_LOADED")
 evFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-evFrame:RegisterEvent("PLAYER_REGEN_DISABLED")  -- entering combat
-evFrame:RegisterEvent("PLAYER_REGEN_ENABLED")   -- leaving combat
+evFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+evFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 evFrame:RegisterEvent("UNIT_AURA")
 evFrame:RegisterEvent("UNIT_COMBAT")
 evFrame:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS")
@@ -490,7 +556,6 @@ end)
 
 evFrame:SetScript("OnEvent", function()
     if event == "VARIABLES_LOADED" then
-        -- ShieldBarDB is now populated from disk – load all settings.
         LoadSettings()
 
     elseif event == "PLAYER_ENTERING_WORLD" then
@@ -530,4 +595,4 @@ evFrame:SetScript("OnEvent", function()
     end
 end)
 
-DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar|r v1.4 loaded.  |cffFFFF00/sb|r for commands.")
+DEFAULT_CHAT_FRAME:AddMessage("|cffFFAA00ShieldBar|r v1.5 loaded.  |cffFFFF00/sb|r for commands.")
