@@ -21,5 +21,6 @@ Displays remaining absorb HP as a segmented bar on screen. Supports Power Word: 
 ## Installation
 
 1. Download and extract the `ShieldBar` folder.
-2. Place it in `World of Warcraft/Interface/AddOns/`.
-3. Reload the UI or log in — the bar appears on the right side of the screen.
+2. Make sure the folder is named `ShieldBar` — GitHub may extract it as `ShieldBar-main`. Rename it if so.
+3. Place it in `World of Warcraft/Interface/AddOns/`.
+4. Reload the UI or log in — the bar appears on the right side of the screen.
