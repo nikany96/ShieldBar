@@ -1,6 +1,6 @@
 # ShieldBar
 
-![ShieldBar in action](screenshot.png)
+![Mana Shield and Fire Ward tracked as two separate bars](screenshot.png)
 
 Absorb shield tracker for OctoWoW.
 
