@@ -1,8 +1,8 @@
 ## Interface: 11200
 ## Title: ShieldBar
-## Notes: Displays absorb shield HP as a segmented bar (PW:Shield, Ice Barrier, Sacrifice, potions, etc.)
+## Notes: One bar per active shield - absorb shields (PW:Shield, Ice Barrier, Mana Shield, Fire/Frost Ward, potions) and Shaman charge shields (Water/Lightning/Earth)
 ## Author: ShieldBar
-## Version: 1.3
+## Version: 2.2
 ## SavedVariables: ShieldBarDB
 
 ShieldBar.lua

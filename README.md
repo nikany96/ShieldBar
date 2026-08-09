@@ -4,31 +4,48 @@
 
 Absorb shield tracker for OctoWoW.
 
-Displays remaining absorb HP as a segmented bar on screen.
+Displays remaining absorb HP as segmented bars on screen — **one bar per active shield**,
+each with its own colour and spell icon, so stacked shields are tracked separately.
 
-**Supported shields:**
+Absorbed damage is routed to the shield that would actually eat it: Fire Ward only takes
+fire damage, Frost Ward only frost, and everything else falls through to the generic
+shields (Power Word: Shield, Mana Shield, Ice Barrier, potions).
+
+**Absorb shields** — the bar shows remaining absorb HP:
 - Power Word: Shield (Priest)
 - Sacrifice (Warlock Voidwalker)
 - Ice Barrier (Mage)
 - Frost Ward (Mage)
 - Fire Ward (Mage)
+- Mana Shield (Mage)
 - Protection potions
 
-## Commands
+**Charge shields** — the bar shows remaining charges:
+- Water Shield (Shaman)
+- Lightning Shield (Shaman)
+- Earth Shield (Shaman) — also found on your target or party members
 
-`/shieldbar` or `/sb`
+## Options
+
+Type `/shieldbar` or `/sb` to open the options window — or right-click any bar.
+
+Everything is configured there: visibility, lock, vertical/horizontal layout,
+straight/curved shape, bar size, and reset. Left-drag the bars to move them,
+Escape closes the window.
+
+### Text commands
+
+Still available for macros:
 
 | Command | Description |
 |---|---|
-| `show` | Always show bar (default) |
-| `hide` | Only show bar when in combat with an active shield |
-| `vertical` | Vertical bar layout (default) |
-| `horizontal` | Horizontal bar layout |
-| `lock` | Lock bar position |
-| `unlock` | Unlock bar position — drag with left mouse button |
-| `curve` | Curved/bent bar shape |
-| `straight` | Straight bar shape (default) |
+| `show` / `hide` | Always visible, or only in combat with an active shield |
+| `vertical` / `horizontal` | Bar layout |
+| `curve` / `straight` | Bar shape |
+| `curve rotate` | Flip curve direction |
 | `size <1-5>` | Bar size — 1 smallest, 5 largest (default: 3) |
+| `lock` / `unlock` | Lock or unlock bar position |
+| `debug` | List your active buffs with texture path and parsed absorb value |
 | `reset` | Reset all settings to default |
 
 ## Installation
