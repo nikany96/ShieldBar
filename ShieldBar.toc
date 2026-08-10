@@ -1,8 +1,8 @@
 ## Interface: 11200
 ## Title: ShieldBar
-## Notes: One bar per active shield - absorb shields (PW:Shield, Ice Barrier, Mana Shield, Fire/Frost Ward, potions) and Shaman charge shields (Water/Lightning/Earth)
+## Notes: One bar per active shield - absorb shields (PW:Shield, Ice Barrier, Mana Shield, Fire/Frost/Shadow Ward, potions) and Shaman charge shields (Water/Lightning/Earth)
 ## Author: ShieldBar
-## Version: 2.2
+## Version: 2.3
 ## SavedVariables: ShieldBarDB
 
 ShieldBar.lua
